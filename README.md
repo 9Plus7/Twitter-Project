@@ -11,6 +11,53 @@ Designs Twitter feed API that allows users to view timelines, like/comment/share
 - User searches keywords
 - Service has high availability
 
+# API Requests
+
+To make a REST API request, combine the HTTP GET, POST, PUT, PATCH, or DELETE method, the URL to the API service, 
+the URI to a resource to query, submit data to, update, or delete, and one or more HTTP request headers.
+
+# Query parameter 
+
+## Tweet Look Up
+
+### GET /tweets request parameters
+attachments.poll_ids
+attachments.media_keys
+author_id
+entities.mentions.username
+geo.place_id
+in_reply_to_user_id
+referenced_tweets.id
+referenced_tweets.id.author_id
+
+
+### Sending Tweets With API
+When creating a new Tweet with endpoint, text or media for the Tweet are the required body parameters.
+
+Key	Value	Parameter type
+text	Hello world! 	body
+
+{
+  "data": {
+    "id": "1445880548472328192",
+    "text": "Hello world!"
+  }
+}
+-If the returned response object contains an id and the text of the Tweet, then successfully created a Tweet.
+
+### Delete tweet
+
+{
+   "data": {
+       "deleted" : true
+   }
+}
+
+
+## Timeline 
+
+- Tweets are delivered in reverse-chronological order, starting with the most recent. Results are paginated up to 100 Tweets per page. Pagination tokens are provided for paging through large sets of Tweets. The Tweet IDs of the newest and the oldest Tweets included in the given page are also provided as metadata, which can also be used for polling timelines for recent Tweets, or for navigating through the timeline similar to the v1.1 user_timeline endpoints. The user Tweet timeline also supports the ability to specify start_time and end_time parameters to receive Tweets that were created within a certain window of time. 
+
 
 ## Constraints and assumptions
 
@@ -35,27 +82,6 @@ General
  - 250 billion read requests per month
 
  - 10 billion searches per month
-
-Timeline
-
- - Viewing the timeline should be fast
-
- - Twitter is more read heavy than write heavy
-
- - Optimize for fast reads of tweets
-
- - Ingesting tweets is write heavy
-
-
-Search
-
- - Searching should be fast
-
- - Search is read-heavy
- 
-## Usage Design
-
-waiting to be edited.
 
 
 ## Tweet
@@ -88,6 +114,7 @@ waiting to be edited.
 - The Client sends a search request to the Web Server
 - The Web Server forwards the request to the Search API server
 - The Search API contacts the Search Service
+
 
 ## Scale:
 waiting to be edied.
