@@ -7,8 +7,9 @@
 - [API Requests](#api-requests)
 - [Query parameter](query-parameter)
 - [GET](#get)
-- [DELETE](delete)
+- [DELETE](#delete)
 - [Timeline](#timeline)
+- [POST](#post)
 
 ##  Use Cases and Constraints Outline
 
