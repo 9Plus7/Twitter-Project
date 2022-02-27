@@ -8,8 +8,9 @@
 - [Query parameter](query-parameter)
 - [GET](#get)
 - [DELETE](#delete)
-- [Timeline](#timeline)
 - [POST](#post)
+- [Timeline](#timeline)
+
 
 ##  Use Cases and Constraints Outline
 
