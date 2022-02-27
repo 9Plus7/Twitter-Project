@@ -1,6 +1,14 @@
 # Twitter-Project
 
-Designs Twitter feed API that allows users to view timelines, like/comment/share tweets with friends and communicate with others.
+> Twitter feed API that allows users to view timelines, like/comment/share tweets with friends and communicate with others.
+
+---
+## Section
+- [API Requests](#api-requests)
+- [Query parameter](query-parameter)
+- [GET](#get)
+- [DELETE](delete)
+- [Timeline](#timeline)
 
 ##  Use Cases and Constraints Outline
 
@@ -8,55 +16,98 @@ Designs Twitter feed API that allows users to view timelines, like/comment/share
 - Service pushes tweets to followers, sending push notifications and emails
 - User views the user timeline (activity from the user)
 - User views the home timeline (activity from people the user is following)
-- User searches keywords
-- Service has high availability
+  
 
-# API Requests
 
-To make a REST API request, combine the HTTP GET, POST, PUT, PATCH, or DELETE method, the URL to the API service, 
+---
+
+ ## API Requests
+
+>To make a REST API request, combine the HTTP GET, POST, PUT, PATCH, or DELETE method, the URL to the API service, 
 the URI to a resource to query, submit data to, update, or delete, and one or more HTTP request headers.
+
+---
 
 # Query parameter 
 
-## Tweet Look Up
+### GET
 
-### GET /tweets request parameters
-attachments.poll_ids
-attachments.media_keys
-author_id
-entities.mentions.username
-geo.place_id
-in_reply_to_user_id
-referenced_tweets.id
-referenced_tweets.id.author_id
+**tweets request parameters**
 
+Type | Name|Description|
+| --- | ---|---|
+|int | user_ids|The numerical ID of the desired user.|
+|int |referenced_tweets.id|The numerical ID of the desired Tweet.|
+|int |referenced_tweets.id.author_id|The referenced tweet's user id.
 
-### Sending Tweets With API
-When creating a new Tweet with endpoint, text or media for the Tweet are the required body parameters.
+---
+### Get Example 
 
-Key	Value	Parameter type
-text	Hello world! 	body
-
+```java
 {
   "data": {
     "id": "1445880548472328192",
     "text": "Hello world!"
   }
 }
--If the returned response object contains an id and the text of the Tweet, then successfully created a Tweet.
+```
+  >**If the returned response object contains an id and the text of the Tweet, then successfully created a Tweet.**
 
-### Delete tweet
+---
 
+### DELETE
+
+
+```java
 {
    "data": {
-       "deleted" : true
+       "deleted" : true/false
    }
 }
 
 
+
+```
+>Destroys the status specified by the required ID parameter. The authenticating user must be the author of the specified status. Returns the destroyed status if successful.
+---
+
+### POST 
+**statuses/update**
+>Updates the authenticating user's current status, also known as Tweeting.
+
+|Type | Name| Description|
+| --- | ---| ---|
+| String| status|The text of the status update.|
+|int|reply_to_status_id|The ID of an existing status that the update is in reply to.|
+
+***Example Request***
+```
+curl -XPOST 
+  --url 'https://api.twitter.com/1.1/statuses/update.json?status=hello' 
+  --header 'authorization: OAuth
+  oauth_consumer_key="oauth_customer_key",
+  oauth_nonce="generated_oauth_nonce",
+  oauth_signature="generated_oauth_signature",
+  oauth_signature_method="HMAC-SHA1",
+  oauth_timestamp="generated_timestamp",
+  oauth_token="oauth_token",
+  oauth_version="1.0"'
+```
+
+
+---
+
 ## Timeline 
 
-- Tweets are delivered in reverse-chronological order, starting with the most recent. Results are paginated up to 100 Tweets per page. Pagination tokens are provided for paging through large sets of Tweets. The Tweet IDs of the newest and the oldest Tweets included in the given page are also provided as metadata, which can also be used for polling timelines for recent Tweets, or for navigating through the timeline similar to the v1.1 user_timeline endpoints. The user Tweet timeline also supports the ability to specify start_time and end_time parameters to receive Tweets that were created within a certain window of time. 
+- Tweets are delivered in reverse-chronological order, starting with the most recent. 
+  
+- Results are paginated up to 100 Tweets per page.
+  
+-  Pagination tokens are provided for paging through large sets of Tweets.
+   
+-  The Tweet IDs of the newest and the oldest Tweets included in the given page.
+
+-  The user Tweet timeline  with the ability to specify start_time and end_time parameters to receive Tweets that were created within a certain window of time. 
 
 
 ## Constraints and assumptions
@@ -125,8 +176,6 @@ waiting to be edied.
 
 ## Security
  
-
-
 
 
 
