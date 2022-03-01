@@ -96,9 +96,10 @@ curl -XPOST
   oauth_version="1.0"'
 ```
 
-## Relational Entity Diagram
-![](/images/diagram.png)
+## Entity Relational Diagram
+![diagram](https://user-images.githubusercontent.com/76961998/156243936-9151954a-93fc-4633-9260-36da7303039a.png)
 
+>The diagram shows the relationships of entity sets stored in the twitter database.
 ---
 
 
