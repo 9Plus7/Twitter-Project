@@ -97,7 +97,7 @@ curl -XPOST
 ```
 
 ## Relational Entity Diagram
-![](https://ibb.co/KwNZJ1w)
+![](/images/diagram.png)
 
 ---
 
