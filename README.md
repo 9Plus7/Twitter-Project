@@ -96,8 +96,11 @@ curl -XPOST
   oauth_version="1.0"'
 ```
 
+## Relational Entity Diagram
+![](https://ibb.co/KwNZJ1w)
 
 ---
+
 
 ## Timeline 
 
