@@ -1,8 +1,12 @@
-###Project Log: Goals to complete
+### Project Log: Goals to be completed
 
->create restful api with spring
-connect spring to relational database(postgre) with JPA
-connect spring to redis
+>Create restful api with spring
+---
+>Connect spring to relational database(postgre) with JPA
+---
+>Connect spring to redis
+---
+
 
 **3.4**
 - installed maven
