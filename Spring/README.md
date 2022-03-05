@@ -12,5 +12,16 @@
 - installed maven
 - auto import dependencies in pom.xml (thymeleaf, server side rendering for html)
 - Creating controller model with 'spring.io/guides'
-- successfully ran html with localhost 8080 http://localhost:8080/hello?name="name"
-- using git to commit changes 
+- successfully ran html with localhost 8080 http://localhost:8080/hello?name="name" using controllers
+- using git to commit changes on github repository
+- created GET/SET basics constructors for user, followers and tweet.
+
+
+---
+
+**3.5**
+
+- built interface on Data Access Object for both users and tweets
+- designed fundamental functions for twitter usages with Spring MVC design pattern.
+- achieved get,follow,delete,unfollow,list, and search interaction.
+- 
