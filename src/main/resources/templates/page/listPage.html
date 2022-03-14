@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>User List</title>
+</head>
+<body>
+<div>
+    <table style="border: solid 1px #aaaaaa;">
+        <thead>
+        <tr>
+            <th>name</th>
+            <th>id</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:if="${list !=null}" th:each="item : ${list}">
+            <td th:text="${item.name}"></td>
+            <td th:text="${item.id}"></td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+</body>
+</html>
