@@ -27,7 +27,7 @@ public class Customer implements Serializable {
     @Column(name = "lastname")
     private String lastName;
 
-    protected Customer(){}
+    public Customer(){}
 
     public Customer(String firstName, String lastName) {
         this.firstName = firstName;
