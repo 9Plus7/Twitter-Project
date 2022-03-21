@@ -1,51 +1,42 @@
 package com.twitter.controller;
 
-import com.twitter.utils.RedisUtil;
-import com.twitter.utils.StateParameter;
-import com.twitter.controller.BaseController;
-import com.twitter.utils.RedisConstants;
+import com.twitter.exception.ResourceNotFoundException;
+import com.twitter.redis.RedisService;
+import com.twitter.redis.Result;
+
 import com.twitter.model.Customer;
-import com.twitter.utils.SerializeUtil;
+import com.twitter.repo.CustomerRepository;
+import com.twitter.repo.TweetRepository;
+import com.twitter.model.Tweet;
 
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.ModelMap;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
 
 @Controller
-@RequestMapping(value="/redis")
-public class RedisController extends BaseController {
+@RequestMapping("/redis")
+public class RedisController {
+    @Autowired
+    private RedisService redisService;
 
     @Autowired
-    RedisUtil redisUtil;
+    TweetRepository tweetRepository;
 
-    /**
-     * @auther: zhangyingqi
-     * @date: 16:23 2018/8/29
-     * @param: []
-     * @return: org.springframework.ui.ModelMap
-     * @Description: 执行redis写/读/生命周期
-     */
-    @RequestMapping(value = "getRedis",method = RequestMethod.POST)
+    @Autowired
+    CustomerRepository customerRepository;
+
+
+
+    @GetMapping("/get")
     @ResponseBody
-    public ModelMap getRedis(){
-        redisUtil.set("20182018","这是一条测试数据", RedisConstants.datebase1);
-        Long resExpire = redisUtil.expire("20182018", 60, RedisConstants.datebase1);//设置key过期时间
-        logger.info("resExpire="+resExpire);
-        String res = redisUtil.get("20182018", RedisConstants.datebase1);
-
-        //测试Redis保存对象
-        Customer c = new Customer();
-        c.setId(24);
-        c.setFirstName("冯绍峰");
-        redisUtil.set("20181017".getBytes(), SerializeUtil.serialize(c),RedisConstants.datebase1);
-        byte[] user = redisUtil.get("20181017".getBytes(),RedisConstants.datebase1);
-        Customer us = (Customer) SerializeUtil.unserialize(user);
-        System.out.println("user="+us.toString());
-
-        return getModelMap(StateParameter.SUCCESS, res, "执行成功");
+    public Result get(){
+        String str=redisService.get("girlfriend",String.class);
+        return Result.success().add("girlfriend",str);
     }
 }
+

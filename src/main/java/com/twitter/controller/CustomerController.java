@@ -5,6 +5,8 @@ package com.twitter.controller;
 import com.twitter.exception.ResourceNotFoundException;
 import com.twitter.model.Customer;
 import com.twitter.model.CustomerUI;
+import com.twitter.redis.RedisService;
+import com.twitter.redis.Result;
 import com.twitter.repo.CustomerRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -22,18 +24,34 @@ public class CustomerController {
     @Autowired
     CustomerRepository repository;
 
+    @Autowired
+    RedisService service;
+
 
     @GetMapping("/customer/get/{id}")
-    public ResponseEntity<Customer> getCustomerById(@PathVariable(value = "id") Long id) throws ResourceNotFoundException {
+    public String getCustomerById(@PathVariable(value = "id") Long id) throws ResourceNotFoundException {
+        String s = service.get(id.toString(), String.class);
 
-        Customer customer = repository.findById(id).orElseThrow(() -> new ResourceNotFoundException("User not found" +
-                "for this id:: " + id));
-        return ResponseEntity.ok().body(customer);
+        if (s == null) {
+            Customer customer = repository.findById(id).orElseThrow(() -> new ResourceNotFoundException("User not found" +
+                    "for this id:: " + id));
+            if(customer == null) return null;
+            return customer.toString();
+        }
+
+        return s;
+
+
     }
 
 
     @PutMapping("/customer/update/{id}")
     public String updateCustomer(@PathVariable(value = "id") Long id, @RequestBody Customer c) throws ResourceNotFoundException {
+
+
+
+        service.set(id.toString(), c.toString());
+
         Customer customers = repository.findById(id).orElseThrow(() -> new ResourceNotFoundException("User not found."));
 
         customers.setFirstName(c.getFirstName());
@@ -58,8 +76,15 @@ public class CustomerController {
     }
 
     @PostMapping("/customer/create")
-    public String create(@RequestBody CustomerUI c) {
+    public String create(@RequestBody CustomerUI c, Long id) {
         // save a single Customer
+
+        if (service.exists(c.toString())) {
+            return "customer exists";
+        }
+
+        service.save(id.toString(), c.toString());
+
         repository.save(new Customer(c.getFirstName(), c.getLastName()));
 
         return "Customer is created";
@@ -68,6 +93,12 @@ public class CustomerController {
 
         @DeleteMapping("/customer/delete/{id}")
         public Map<String, Boolean> delete (@PathVariable(value = "id") Long id) throws ResourceNotFoundException {
+
+            if (service.exists(id.toString())) {
+
+                service.delete(id.toString());
+            }
+
             Customer customer = repository.findById(id).orElseThrow(() -> new ResourceNotFoundException("User not found."));
 
             this.repository.delete(customer);
