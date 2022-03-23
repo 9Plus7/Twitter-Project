@@ -45,21 +45,6 @@ public class CustomerController {
     }
 
 
-    @PutMapping("/customer/update/{id}")
-    public String updateCustomer(@PathVariable(value = "id") Long id, @RequestBody Customer c) throws ResourceNotFoundException {
-
-
-
-        service.set(id.toString(), c.toString());
-
-        Customer customers = repository.findById(id).orElseThrow(() -> new ResourceNotFoundException("User not found."));
-
-        customers.setFirstName(c.getFirstName());
-        customers.setLastName(c.getLastName());
-
-
-        return this.repository.save(customers).toString();
-    }
 
     @PostMapping("/customer/bulkcreate")
     public String bulkcreate() {

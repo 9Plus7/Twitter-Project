@@ -27,11 +27,15 @@ public class Customer implements Serializable {
     @Column(name = "lastname")
     private String lastName;
 
+    @Column(name = "popular")
+    private boolean popular;
+
     public Customer(){}
 
     public Customer(String firstName, String lastName) {
         this.firstName = firstName;
         this.lastName = lastName;
+        this.popular = false;
     }
 
     @Override
@@ -51,7 +55,9 @@ public class Customer implements Serializable {
     public void setLastName(String lastName) {
         this.lastName = lastName;
     }
-
+    public Boolean getPopular() {return popular; }
+    public void setPopular(boolean p) {this.popular = p; }
+    public long getId(){return id;}
 
 
 }

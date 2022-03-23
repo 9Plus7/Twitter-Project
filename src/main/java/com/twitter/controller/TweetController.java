@@ -8,24 +8,43 @@ import com.twitter.redis.RedisService;
 import com.twitter.redis.Result;
 import com.twitter.repo.CustomerRepository;
 import com.twitter.repo.TweetRepository;
+import com.twitter.service.CustomerService;
 import com.twitter.model.Tweet;
 import com.twitter.model.TweetUI;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import com.twitter.service.TweetService;
 
 @RestController
 @RequestMapping("/api")
 public class TweetController {
 
-    @Autowired
-    TweetRepository tweetRepository;
 
     @Autowired
-    CustomerRepository customerRepository;
+    CustomerService userService;
 
     @Autowired
     RedisService service;
+
+    @Autowired
+    TweetService tweetService;
+
+    @GetMapping("/tweet/get/")
+    public Tweet getTweetById(long user_id, long tweet_id) throws Exception {
+
+        boolean popular = userService.isPopular(user_id);
+
+        if (popular) {
+            Tweet tweet = tweetService.getTweet(user_id, tweet_id);
+            return tweet;
+
+        } else {
+            tweetService.getFeed(user_id);
+        }
+
+    }
+
 
     @PostMapping("/tweet/create")
     public Result create(@RequestBody Tweet tweet, Long id){
@@ -58,25 +77,7 @@ public class TweetController {
         return response;
     }
 
-    @GetMapping("/tweet/get/{id}")
-    public String getTweetById(@PathVariable(value = "id") Long id) throws ResourceNotFoundException {
 
-
-        String s = service.get(id.toString(), String.class);
-        if (s == null) {
-            Tweet tweet = tweetRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Tweet not found."));
-
-            if (tweet == null) {
-
-                service.set(id.toString(), tweet.toString());
-                return null;
-            }
-            return tweet.toString();
-        }
-
-
-        return s;
-    }
 
 
     @PutMapping("/tweet/update/{id}")

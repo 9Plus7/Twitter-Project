@@ -4,6 +4,7 @@ import com.twitter.model.Customer;
 
 
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -21,4 +22,9 @@ public interface CustomerRepository extends JpaRepository<Customer, Long> {
 
     @Query("SELECT a FROM Customer a WHERE a.firstName like %:name% or a.lastName like %:name%")
     List<Customer> fetchUsers(@Param("name") String name);
+
+    @Query("select user_id, count(distinct follower_id) followers_count from Customer")
+    Integer countFollower(long user_id);
+
+
 }

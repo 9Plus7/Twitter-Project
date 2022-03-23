@@ -3,6 +3,7 @@ package com.twitter.model;
 public class CustomerUI {
     private String firstName;
     private String lastName;
+    private boolean popular;
 
     protected CustomerUI() {
     }
@@ -10,6 +11,7 @@ public class CustomerUI {
     public CustomerUI(String firstName, String lastName) {
         this.firstName = firstName;
         this.lastName = lastName;
+        this.popular = false;
     }
 
     public String getFirstName() {
@@ -24,6 +26,8 @@ public class CustomerUI {
     public void setLastName(String lastName) {
         this.lastName = lastName;
     }
+    public Boolean getPopular() {return popular; }
+    public void setPopular(boolean p) {this.popular = p; }
 
     public String toString() {
         return String.format("Customer[firstName='%s', lastName='%s']", firstName, lastName);
