@@ -211,25 +211,28 @@ waiting to be edied.
 ## Caching
 >Achieved CRUD caching utilities with jedis resource pool.
 
-```
+```java
+ public Object hget(byte[] key, byte[] field) {
+        Jedis jedis = null;
+        Object res = null;
+        try {
+            jedis = jedisPool.getResource();
+            res = jedis.hget(key, field);
+        } catch (Exception e) {
+
+            log.error(e.getMessage());
+        } finally {
+            returnResource(jedisPool, jedis);
+        }
+
+        return res;
+    }
 
 ```
 
 ## Asynchronism and microservices
-
-## Security
+- User Services
+- Tweet Services
+- Follower Services
  
-
-
-
-**Project Log:**
-Goals to complete 
-- create restful api with spring
-- connect spring to relational database(postgre) with JPA
-- connect spring to redis
-
-3.4- installed maven
-   - auto import dependencies in pom.xml (thymeleaf, server side rendering for html)
-   - Creating controller model with 'spring.io/guides'
-   - successfully ran html with localhost 8080 http://localhost:8080/hello?name="name"
 
