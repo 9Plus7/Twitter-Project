@@ -38,6 +38,12 @@ public class Customer implements Serializable {
         this.popular = false;
     }
 
+    public Customer(String name){
+        this.firstName = name;
+        this.lastName = "";
+        this.popular = false;
+    }
+
     @Override
     public String toString() {
         return String.format("Customer[id=%d, firstName='%s', lastName='%s']", id, firstName, lastName);

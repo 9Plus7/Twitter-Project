@@ -6,12 +6,10 @@ import com.twitter.exception.ResourceNotFoundException;
 import com.twitter.model.Customer;
 import com.twitter.model.CustomerUI;
 import com.twitter.redis.RedisService;
-import com.twitter.redis.Result;
 import com.twitter.repo.CustomerRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import com.twitter.service.CustomerService;
 
-
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
@@ -22,149 +20,36 @@ import java.util.*;
 public class CustomerController {
 
     @Autowired
-    CustomerRepository repository;
-
-    @Autowired
-    RedisService service;
+    CustomerService service;
 
 
-    @GetMapping("/customer/get/{id}")
-    public String getCustomerById(@PathVariable(value = "id") Long id) throws ResourceNotFoundException {
-        String s = service.get(id.toString(), String.class);
+    @GetMapping("/customer/{id}")
+    public CustomerUI getUserById(@PathVariable(value = "id") long id) throws ResourceNotFoundException {
+            CustomerUI c = service.getUserById(id);
 
-        if (s == null) {
-            Customer customer = repository.findById(id).orElseThrow(() -> new ResourceNotFoundException("User not found" +
-                    "for this id:: " + id));
-            if(customer == null) return null;
-            return customer.toString();
-        }
+            return c;
 
-        return s;
+    }
 
+    @PostMapping("/customer")
+    public String createUser(String name) {
+
+       return service.createUser(name);
 
     }
 
 
+        @DeleteMapping("/customer/{id}")
+        public String deleteUser (@PathVariable(value = "id") long id) throws ResourceNotFoundException {
 
-    @PostMapping("/customer/bulkcreate")
-    public String bulkcreate() {
-        // save a single Customer
-        repository.save(new Customer("Rajesh", "Bhojwani"));
+            return service.deleteUserById(id);
 
-        // save a list of Customer
-        repository.saveAll(Arrays.asList(new Customer("Salim", "Khan")
-                , new Customer("Rajesh", "Parihar")
-                , new Customer("Rahul", "Dravid")
-                , new Customer("Dharmendra", "Bhojwani")));
-
-        return "Customer are created";
-    }
-
-    @PostMapping("/customer/create")
-    public String create(@RequestBody CustomerUI c, Long id) {
-        // save a single Customer
-
-        if (service.exists(c.toString())) {
-            return "customer exists";
         }
 
-        service.save(id.toString(), c.toString());
-
-        repository.save(new Customer(c.getFirstName(), c.getLastName()));
-
-        return "Customer is created";
-    }
-
-
-        @DeleteMapping("/customer/delete/{id}")
-        public Map<String, Boolean> delete (@PathVariable(value = "id") Long id) throws ResourceNotFoundException {
-
-            if (service.exists(id.toString())) {
-
-                service.delete(id.toString());
-            }
-
-            Customer customer = repository.findById(id).orElseThrow(() -> new ResourceNotFoundException("User not found."));
-
-            this.repository.delete(customer);
-
-            Map<String, Boolean> response = new HashMap<>();
-            response.put("deleted", Boolean.TRUE);
-
-            return response;
+        @PutMapping("customer/{id}")
+        public CustomerUI updateUser(@PathVariable(value= "id")long id, String name) throws Exception {
+                return service.updateUser(id, name);
         }
 
 
-        @GetMapping("/customer/findall")
-        public List<CustomerUI> findAll () {
-
-            List<Customer> customers = repository.findAll();
-            List<CustomerUI> customerUI = new ArrayList<>();
-
-            for (Customer customer : customers) {
-                customerUI.add(new CustomerUI(customer.getFirstName(), customer.getLastName()));
-            }
-
-            return customerUI;
-        }
-
-        @RequestMapping("/customer/search/{id}")
-        public String search ( @PathVariable long id){
-            String Customer = repository.findById(id).toString();
-            return Customer;
-        }
-
-        @GetMapping("/customer/searchbyfirstname/{firstname}")
-        public List<CustomerUI> fetchDataByFirstName (@PathVariable String firstname){
-
-            List<Customer> customers = repository.findByFirstName(firstname);
-            List<CustomerUI> customerUI = new ArrayList<>();
-
-            for (Customer customer : customers) {
-                customerUI.add(new CustomerUI(customer.getFirstName(), customer.getLastName()));
-            }
-
-            return customerUI;
-        }
-
-        @RequestMapping("/customer/searchbylastname/{lastname}")
-        public List<CustomerUI> fetchDataByLastName (@PathVariable String lastname){
-
-            List<Customer> customers = repository.findByLastName(lastname);
-            List<CustomerUI> customerUI = new ArrayList<>();
-
-            for (Customer customer : customers) {
-                customerUI.add(new CustomerUI(customer.getFirstName(), customer.getLastName()));
-            }
-
-            return customerUI;
-        }
-
-        @RequestMapping("/customer/searchname/{name}")
-        public List<CustomerUI> fetchDataByConstraining (@PathVariable String name){
-
-            List<Customer> customers = repository.fetchUsers(name);
-            System.out.println(customers.size());
-            List<CustomerUI> customerUI = new ArrayList<>();
-
-            for (Customer customer : customers) {
-                customerUI.add(new CustomerUI(customer.getFirstName(), customer.getLastName()));
-            }
-
-            return customerUI;
-        }
-
-        @RequestMapping("/customer/searchname2/{name}")
-        public List<CustomerUI> fetchDataByConstraining2 (@PathVariable String name){
-
-            List<Customer> customers = repository.findByFirstNameLike(name);
-            System.out.println(customers.size());
-            List<CustomerUI> customerUI = new ArrayList<>();
-
-            for (Customer customer : customers) {
-                customerUI.add(new CustomerUI(customer.getFirstName(), customer.getLastName()));
-            }
-
-            return customerUI;
-        }
     }

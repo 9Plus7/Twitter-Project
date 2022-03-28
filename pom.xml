@@ -99,6 +99,14 @@
 			<version>3.5</version>
 		</dependency>
 
+		<!-- https://mvnrepository.com/artifact/org.activiti/spring-boot-starter-basic -->
+		<dependency>
+			<groupId>org.activiti</groupId>
+			<artifactId>spring-boot-starter-basic</artifactId>
+			<version>5.17.0</version>
+		</dependency>
+
+
 	</dependencies>
 
 	<build>

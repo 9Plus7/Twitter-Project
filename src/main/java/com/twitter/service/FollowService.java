@@ -42,8 +42,6 @@ public class FollowService {
 
     }
 
-
-
     public void unfollowUser(Long user_id, Long follower_id) throws Exception
     {
         Customer user =userRepository.findById(user_id).orElseThrow(() -> new ResourceNotFoundException("User not found."));

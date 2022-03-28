@@ -4,7 +4,6 @@ import com.twitter.model.Customer;
 import com.twitter.model.CustomerUI;
 import com.twitter.repo.CustomerRepository;
 
-import org.apache.commons.*;
 
 import com.twitter.exception.ResourceNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,7 +13,6 @@ import org.springframework.stereotype.Service;
 
 
 import com.twitter.redis.RedisService;
-import com.twitter.redis.Result;
 
 import org.springframework.util.SerializationUtils;
 
@@ -47,86 +45,76 @@ public class CustomerService {
 
     public CustomerUI getUserById(long id) throws ResourceNotFoundException {
 
-        String cache = service.hget(HASH_KEY, id);
 
-        CustomerUI ui = new CustomerUI("", "");
+        CustomerUI cache = (CustomerUI)service.hget(SerializationUtils.serialize(HASH_KEY), SerializationUtils.serialize(id));
+
+        CustomerUI ui = new CustomerUI("", "", false);
 
         if (cache == null) {
 
             Customer customer = repo.findById(id).orElseThrow(() -> new ResourceNotFoundException("User not found."));
 
-            service.hset(HASH_KEY, String.valueOf(id), customer.toString());
-            ui.setFirstName(customer.getFirstName());
-            ui.setLastName(customer.getLastName());
+            service.hset(SerializationUtils.serialize(HASH_KEY), SerializationUtils.serialize(id), SerializationUtils.serialize(customer));
+            ui = (CustomerUI)service.hget(SerializationUtils.serialize(HASH_KEY), SerializationUtils.serialize(id));
 
             return ui;
 
+        } else {
+            ui = cache;
+            return ui;
         }
 
-        return ui;
 
     }
 
     public String deleteUserById(long id) throws ResourceNotFoundException {
 
-        String cache = service.hget(HASH_KEY, id);
+        CustomerUI cache = (CustomerUI)service.hget(SerializationUtils.serialize(HASH_KEY), SerializationUtils.serialize(id));
 
         if (cache == null) {
-            return "user does not exist";
+            Customer customer = repo.findById(id).orElseThrow(() -> new ResourceNotFoundException("User not found."));
+            repo.deleteById(customer.getId());
         } else {
             service.del(HASH_KEY, String.valueOf(id));
+            Customer customer = repo.findById(id).orElseThrow(() -> new ResourceNotFoundException("User not found."));
+            repo.deleteById(customer.getId());
         }
-
-        Customer customer = repo.findById(id).orElseThrow(() -> new ResourceNotFoundException("User not found."));
-        repo.deleteById(id);
 
         return "delete success";
 
     }
 
-    public String saveUser (Customer user, long id) throws ResourceNotFoundException {
+    public CustomerUI updateUser(long id, String name) throws Exception {
 
-        String cache = service.hget(HASH_KEY, id);
-        Customer u = repo.getById(id);
-
+        CustomerUI cache = (CustomerUI) service.hget(SerializationUtils.serialize(HASH_KEY), SerializationUtils.serialize(id));
+        Customer c = new Customer(name);
         if (cache == null) {
+            service.hset(SerializationUtils.serialize(HASH_KEY), SerializationUtils.serialize(id), SerializationUtils.serialize(c));
+            System.out.println("save in cache");
+            Customer customer = repo.findById(id).orElse(null);
 
-                byte[] userUI = SerializationUtils.serialize(user);
-                byte[] key = SerializationUtils.serialize(HASH_KEY);
-
-                service.set(key, userUI, 0);
-
-            if (u == null){
-
-                repo.save(user);
-
-                return "save success in database and cache";
-
+            if (customer.equals(null)) {
+                repo.save(customer);
+                CustomerUI ui = new CustomerUI(customer.getFirstName(), customer.getLastName(), customer.getPopular());
+                return ui;
             }
 
-                return "save success in cache";
-
-        } else {
-            return "save failed, user already exist";
         }
+        return cache;
+    }
 
+    public String createUser(String name) {
+        Customer c = repo.findByName(name);
 
+        if (c == null) {
+            repo.save(new Customer(name));
+            return "user saved in db";
+        }
+        service.hset(SerializationUtils.serialize(HASH_KEY), SerializationUtils.serialize(0), SerializationUtils.serialize(c));
 
+        return "saved in cache";
     }
 
 
-    public String deleteUser(long id) throws ResourceNotFoundException {
-
-        service.del(0, HASH_KEY, String.valueOf(id));
-
-        Customer customer = repo.findById(id).orElseThrow(() -> new ResourceNotFoundException("User not found."));
-
-        repo.deleteById(id);
-
-        return "delete successful";
-    }
-
-
-
-
+    public List<Customer> findAll() {return repo.findAll();}
 }

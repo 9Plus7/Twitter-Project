@@ -18,6 +18,8 @@ import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.SortingParams;
 
+import org.springframework.util.SerializationUtils;
+
 @Component
 @Slf4j
 public class RedisService{
@@ -252,6 +254,20 @@ public class RedisService{
      * @return true OR false
      */
     public Boolean exists(String key) {
+        Jedis jedis = null;
+        try {
+            jedis = jedisPool.getResource();
+            return jedis.exists(key);
+        } catch (Exception e) {
+
+            log.error(e.getMessage());
+            return false;
+        } finally {
+            returnResource(jedisPool, jedis);
+        }
+    }
+
+    public Boolean exists(byte[] key) {
         Jedis jedis = null;
         try {
             jedis = jedisPool.getResource();
@@ -778,6 +794,21 @@ public class RedisService{
         return res;
     }
 
+    public Long hset(byte[] key, byte[] field, byte[] value) {
+        Jedis jedis = null;
+        long res = 0;
+        try {
+            jedis = jedisPool.getResource();
+            res = jedis.hset(key, field, value);
+        } catch (Exception e) {
+
+            log.error(e.getMessage());
+        } finally {
+            returnResource(jedisPool, jedis);
+        }
+        return res;
+    }
+
 
 
     /**
@@ -854,21 +885,23 @@ public class RedisService{
         return res;
     }
 
-    public String hget(String key, Long field) {
+
+
+    public Object hget(byte[] key, byte[] field) {
         Jedis jedis = null;
-        String res = null;
+        Object res = null;
         try {
             jedis = jedisPool.getResource();
-            res = jedis.hget(key, String.valueOf(field));
+            res = jedis.hget(key, field);
         } catch (Exception e) {
 
             log.error(e.getMessage());
         } finally {
             returnResource(jedisPool, jedis);
         }
+
         return res;
     }
-
 
     /**
      * <p>

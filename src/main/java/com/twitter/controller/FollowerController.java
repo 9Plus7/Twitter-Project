@@ -31,7 +31,7 @@ public class FollowerController {
         return new ResponseEntity<>(apiResponse.getBodyResponse(),HttpStatus.CREATED);
     }
 
-    @DeleteMapping(path = "unfollow/user/{user_id}",  produces = "application/json")
+    @DeleteMapping(path = "unfollow/{user_id}",  produces = "application/json")
     public ResponseEntity<Object> deleteFollowee(
             Long curr_id, @PathVariable("user_id") long user_id
     ) throws Exception

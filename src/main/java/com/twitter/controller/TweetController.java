@@ -4,18 +4,17 @@ import java.util.*;
 
 import com.twitter.exception.ResourceNotFoundException;
 
-import com.twitter.redis.RedisService;
-import com.twitter.redis.Result;
-import com.twitter.repo.CustomerRepository;
-import com.twitter.repo.TweetRepository;
+
 import com.twitter.service.CustomerService;
 import com.twitter.model.Tweet;
 import com.twitter.model.TweetUI;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+
 import org.springframework.web.bind.annotation.*;
 import com.twitter.service.TweetService;
 
+@EnableAutoConfiguration(exclude={org.activiti.spring.boot.SecurityAutoConfiguration.class})
 @RestController
 @RequestMapping("/api")
 public class TweetController {
@@ -25,100 +24,64 @@ public class TweetController {
     CustomerService userService;
 
     @Autowired
-    RedisService service;
-
-    @Autowired
     TweetService tweetService;
 
-    @GetMapping("/tweet/get/")
-    public Tweet getTweetById(long user_id, long tweet_id) throws Exception {
+
+    @GetMapping("/tweet")
+    public List<Tweet> getTimeline(long user_id) throws ResourceNotFoundException {
 
         boolean popular = userService.isPopular(user_id);
+        List<Tweet> timeline = new ArrayList<>();
 
         if (popular) {
-            Tweet tweet = tweetService.getTweet(user_id, tweet_id);
-            return tweet;
-
+            timeline = tweetService.getFeed(user_id);
+            return timeline;
         } else {
-            tweetService.getFeed(user_id);
+            timeline = tweetService.findAll();
         }
+
+        return timeline;
+    }
+
+    @GetMapping("/tweet/{id}")
+    public TweetUI getTweetById(long tweet_id) throws Exception {
+
+        TweetUI tweet = new TweetUI(tweetService.getTweet(tweet_id).getContent());
+        return tweet;
 
     }
 
 
-    @PostMapping("/tweet/create")
-    public Result create(@RequestBody Tweet tweet, Long id){
-        // save a single tweet
-        if (service.exists(tweet.toString())) {
-            return Result.success();
-        }
+    @PostMapping("/tweet")
+    public TweetUI createTweetById(@RequestBody String content, long id) throws Exception {
 
-        service.save(id.toString(), tweet.getContent());
-        tweetRepository.save(new Tweet (tweet.getContent()));
-
-        return Result.success();
+        TweetUI t = new TweetUI(tweetService.createTweet(id, content).getContent());
+        return t;
 
     }
 
-    @DeleteMapping("/tweet/delete/{id}")
-    public Map<String, Boolean> delete (@PathVariable(value = "id") Long id) throws ResourceNotFoundException {
-        if (service.exists(id.toString())) {
+    @DeleteMapping("/tweet/{id}")
+    public TweetUI deleteTweetById (@PathVariable(value = "id") long id) throws Exception {
 
-            service.delete(id.toString());
-        }
+            TweetUI t = new TweetUI(tweetService.deleteTweet(id).getContent());
+            return t;
 
-        Tweet tweet = tweetRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("tweet not found."));
-
-        this.tweetRepository.delete(tweet);
-
-        Map<String, Boolean> response = new HashMap<>();
-        response.put("deleted", Boolean.TRUE);
-
-        return response;
     }
 
 
 
-
-    @PutMapping("/tweet/update/{id}")
-    public String updateTweet(@PathVariable(value = "id") Long id, @RequestBody Tweet t) throws ResourceNotFoundException {
-        if (service.exists(id.toString())) {
-            service.set(id.toString(), t.toString());
-        }
-        Tweet tweet = tweetRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Tweet not found."));
-
-
-       tweet.setContent(t.getContent());
-
-
-        return this.tweetRepository.save(tweet).toString();
+    @PutMapping("/tweet/{id}")
+    public TweetUI updateTweet(@PathVariable(value = "id") long id, @RequestBody Tweet t) throws Exception {
+       String content = t.getContent();
+        TweetUI ui = new TweetUI(tweetService.updateTweet(id, content).getContent());
+        return ui;
     }
 
     @GetMapping("/tweet/findall")
     public List<Tweet> findAllTweets(){
 
-        List<Tweet> tweets = tweetRepository.findAll();
+        List<Tweet> tweets = tweetService.findAll();
         return tweets;
-    }
-
-    @RequestMapping("/tweet/search/{id}")
-    public TweetUI searchTweet(@PathVariable long id){
-
-        Tweet tweet = (Tweet) tweetRepository.findById(id);
-        return new TweetUI(tweet.getContent());
-    }
-
-    @RequestMapping("/tweet/searchcontent/{str}")
-    public List<TweetUI> fetchTweetByConstraining(@PathVariable String str){
-
-        List<Tweet> tweets = tweetRepository.fetchTweetsWithContent(str);
-        List<TweetUI> tweetsUI = new ArrayList<>();
-
-        for (Tweet tweet : tweets) {
-            tweetsUI.add(new TweetUI(tweet.getContent()));
-        }
-
-        return tweetsUI;
     }
 
 

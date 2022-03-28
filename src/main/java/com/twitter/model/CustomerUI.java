@@ -8,11 +8,17 @@ public class CustomerUI {
     protected CustomerUI() {
     }
 
-    public CustomerUI(String firstName, String lastName) {
+    public CustomerUI(String firstName, String lastName, boolean popular) {
         this.firstName = firstName;
         this.lastName = lastName;
         this.popular = false;
     }
+    public CustomerUI(String name){
+        this.firstName = name;
+        this.lastName = "";
+        this.popular = false;
+    }
+
 
     public String getFirstName() {
         return firstName;

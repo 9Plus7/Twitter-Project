@@ -9,13 +9,13 @@ import com.twitter.repo.TweetRepository;
 import com.twitter.model.Follower;
 import com.twitter.repo.FollowerRepository;
 
-import org.apache.commons.*;
 import com.twitter.exception.ResourceNotFoundException;
 
 
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.twitter.service.CustomerService;
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.stereotype.Service;
 
 
@@ -32,13 +32,15 @@ public class TweetService {
 
 
     @Autowired
-    private RedisService service;
+    private RedisService redis;
 
     @Autowired
     private TweetRepository tweetRepository;
 
     @Autowired CustomerService userService;
 
+
+    public static final String HASH_KEY = "Tweet";
 
 
     public List<Tweet> getFeed(long user_id) throws ResourceNotFoundException {
@@ -60,10 +62,51 @@ public class TweetService {
 
     }
 
-        public Tweet getTweet(long user_id, long tweet_id) throws Exception {
+        public Tweet getTweet(long tweet_id) throws Exception {
 
-            Tweet tweet = tweetRepository.findById(tweet_id).orElseThrow(() -> new ResourceNotFoundException("User not found"));
+
+            if (redis.exists(String.valueOf(tweet_id))) {
+                Tweet t = (Tweet) redis.hget(SerializationUtils.serialize(HASH_KEY), SerializationUtils.serialize(tweet_id));
+                return t;
+            }
+            Tweet tweet = tweetRepository.findById(tweet_id).orElseThrow(() -> new ResourceNotFoundException("Tweet not found"));
             return tweet;
+        }
+
+        public Tweet deleteTweet(long tweet_id) throws Exception {
+
+            Tweet tweet = tweetRepository.findById(tweet_id).orElseThrow(() -> new ResourceNotFoundException("Tweet not found"));
+            tweetRepository.deleteById(tweet_id);
+            redis.del(0, SerializationUtils.serialize(tweet_id));
+
+            return tweet;
+        }
+
+        public Tweet updateTweet(long tweet_id, String content)throws Exception{
+                Tweet tweet = tweetRepository.findById(tweet_id).orElse(null);
+                if (tweet == null) {
+                    throw new ResourceNotFoundException("tweet does not exist");
+                }
+
+                tweet.setContent(content);
+                redis.hset(SerializationUtils.serialize(HASH_KEY), SerializationUtils.serialize(tweet_id), SerializationUtils.serialize(content));
+
+                return tweet;
+        }
+
+        public Tweet createTweet(long tweet_id, String content)throws Exception {
+                Tweet tweet = tweetRepository.findById(tweet_id).orElse(null);
+                if (tweet == null) {
+                    tweet = new Tweet(content);
+                    tweetRepository.save(tweet);
+                    return tweet;
+                }
+            redis.hset(SerializationUtils.serialize(HASH_KEY), SerializationUtils.serialize(tweet_id), SerializationUtils.serialize(content));
+                return tweet;
+        }
+
+        public List<Tweet> findAll() {
+            return tweetRepository.findAll();
         }
 
 }

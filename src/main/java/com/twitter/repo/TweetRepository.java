@@ -16,17 +16,10 @@ public interface TweetRepository extends CrudRepository<Tweet, Long>{
     @Query(value = "SELECT a FROM Tweet a WHERE a.content like %:str%")
     List<Tweet> fetchTweetsWithContent(@Param("str") String str);
 
-    @Query("select t from Tweet t where tweeter_userid =?1 order by tweet_updated_at desc")
+    @Query("select t from Tweet t where tweeter_userid =?1")
     List<Tweet> findLatestTweetByUser(Long userid);
 
-    @Query( value="SELECT * "
-            + "FROM tweet "
-            + "WHERE tweeter_userid IN"
-            + "("
-            + "SELECT followee FROM follower WHERE follower = ?1"
-            + ") "
-            + "ORDER BY tweet_updated_at DESC",
-            nativeQuery = true
-    )
+
+    @Query(value = "select * from Tweet where tweeter_userid in (select followee from Follwer where follower =?1)", nativeQuery = true)
     List<Tweet> findTweetsThatUserFollows(CustomerUI user);
 }
