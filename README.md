@@ -30,7 +30,7 @@ the URI to a resource to query, submit data to, update, or delete, and one or mo
 
 ---
 
-# Query parameter 
+# Basic Query parameter 
 
 ### GET
 
@@ -39,18 +39,20 @@ the URI to a resource to query, submit data to, update, or delete, and one or mo
 Type | Name|Description|
 | --- | ---|---|
 |int | user_ids|The numerical ID of the desired user.|
-|int |referenced_tweets.id|The numerical ID of the desired Tweet.|
-|int |referenced_tweets.id.author_id|The referenced tweet's user id.
+
 
 ---
 ### Get Example 
-
+> Getting a user instance from database/redis with given id
 ```java
 {
-  "data": {
-    "id": "1445880548472328192",
-    "text": "Hello world!"
-  }
+  @GetMapping("/customer/{id}")
+    public CustomerUI getUserById(@PathVariable(value = "id") long id) throws ResourceNotFoundException {
+            CustomerUI c = service.getUserById(id);
+
+            return c;
+
+    }
 }
 ```
   >**If the returned response object contains an id and the text of the Tweet, then successfully created a Tweet.**
@@ -58,43 +60,53 @@ Type | Name|Description|
 ---
 
 ### DELETE
-
+>Deletes a user from current database and redis.
 
 ```java
 {
-   "data": {
-       "deleted" : true/false
-   }
+   @DeleteMapping("/customer/{id}")
+        public String deleteUser (@PathVariable(value = "id") long id) throws ResourceNotFoundException {
+
+            return service.deleteUserById(id);
+
+        }
 }
-
-
 
 ```
 >Destroys the status specified by the required ID parameter. The authenticating user must be the author of the specified status. Returns the destroyed status if successful.
 ---
 
 ### POST 
-**statuses/update**
->Updates the authenticating user's current status, also known as Tweeting.
+>creates a user with given name, stores into 
+database and redis.
 
 |Type | Name| Description|
 | --- | ---| ---|
-| String| status|The text of the status update.|
-|int|reply_to_status_id|The ID of an existing status that the update is in reply to.|
+| String| string|The name of the user to create.|
+
 
 ***Example Request***
+```java
+@PostMapping("/customer")
+    public String createUser(String name) {
+
+       return service.createUser(name);
+
+    }
 ```
-curl -XPOST 
-  --url 'https://api.twitter.com/1.1/statuses/update.json?status=hello' 
-  --header 'authorization: OAuth
-  oauth_consumer_key="oauth_customer_key",
-  oauth_nonce="generated_oauth_nonce",
-  oauth_signature="generated_oauth_signature",
-  oauth_signature_method="HMAC-SHA1",
-  oauth_timestamp="generated_timestamp",
-  oauth_token="oauth_token",
-  oauth_version="1.0"'
+
+### PUT 
+**statuses/update**
+>Updates the authenticating user's current name, with the given user id and updated new name.
+
+```java
+
+  @PutMapping("customer/{id}")
+        public CustomerUI updateUser(@PathVariable(value= "id")long id, String name) throws Exception {
+                return service.updateUser(id, name);
+        }
 ```
+
 
 ## Entity Relational Diagram
 ![diagram](https://user-images.githubusercontent.com/76961998/156243936-9151954a-93fc-4633-9260-36da7303039a.png)
@@ -113,7 +125,27 @@ curl -XPOST
    
 -  The Tweet IDs of the newest and the oldest Tweets included in the given page.
 
--  The user Tweet timeline  with the ability to specify start_time and end_time parameters to receive Tweets that were created within a certain window of time. 
+***Example***
+
+```java
+
+  @GetMapping("/tweet")
+    public List<Tweet> getTimeline(long user_id) throws ResourceNotFoundException {
+
+        boolean popular = userService.isPopular(user_id);
+        List<Tweet> timeline = new ArrayList<>();
+
+        if (popular) {
+            timeline = tweetService.getFeed(user_id);
+            return timeline;
+        } else {
+            timeline = tweetService.findAll();
+        }
+
+        return timeline;
+    }
+
+```
 
 
 ## Constraints and assumptions
@@ -181,6 +213,7 @@ waiting to be edied.
 
 ```
 
+```
 
 ## Asynchronism and microservices
 
