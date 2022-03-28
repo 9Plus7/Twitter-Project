@@ -177,6 +177,10 @@ General
 waiting to be edied.
 
 ## Caching
+>Achieved CRUD caching utilities with jedis resource pool.
+
+```
+
 
 ## Asynchronism and microservices
 
